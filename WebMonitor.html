@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Prajurit Dua Pemain</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a4b8c);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid #ff9900;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #ff9900;
+            text-shadow: 0 0 10px #ff9900, 0 0 20px #ff9900;
+        }
+        
+        .players-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin: 20px 0;
+        }
+        
+        .player {
+            width: 300px;
+            text-align: center;
+        }
+        
+        .player-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .player1 .player-title {
+            background: rgba(255, 51, 102, 0.3);
+            color: #ff3366;
+            border: 2px solid #ff3366;
+        }
+        
+        .player2 .player-title {
+            background: rgba(51, 204, 51, 0.3);
+            color: #33cc33;
+            border: 2px solid #33cc33;
+        }
+        
+        .soldier-container {
+            position: relative;
+            width: 300px;
+            height: 500px;
+            margin: 0 auto;
+        }
+        
+        .soldier {
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="500" viewBox="0 0 300 500"><rect x="0" y="0" width="300" height="500" fill="%23333" /><circle cx="150" cy="120" r="60" fill="%23c0c0c0" /><rect x="90" y="180" width="120" height="200" fill="%23366cb0" /><rect x="90" y="380" width="40" height="80" fill="%23366cb0" /><rect x="170" y="380" width="40" height="80" fill="%23366cb0" /><rect x="60" y="180" width="30" height="120" fill="%23366cb0" /><rect x="210" y="180" width="30" height="120" fill="%23366cb0" /></svg>') no-repeat center;
+            background-size: contain;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .player2 .soldier {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="500" viewBox="0 0 300 500"><rect x="0" y="0" width="300" height="500" fill="%23333" /><circle cx="150" cy="120" r="60" fill="%23c0c0c0" /><rect x="90" y="180" width="120" height="200" fill="%23b36633" /><rect x="90" y="380" width="40" height="80" fill="%23b36633" /><rect x="170" y="380" width="40" height="80" fill="%23b36633" /><rect x="60" y="180" width="30" height="120" fill="%23b36633" /><rect x="210" y="180" width="30" height="120" fill="%23b36633" /></svg>') no-repeat center;
+            background-size: contain;
+        }
+        
+        .head-shot .soldier::before {
+            content: '';
+            position: absolute;
+            top: 60px;
+            left: 90px;
+            width: 120px;
+            height: 120px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="%23ffffff" /><circle cx="40" cy="45" r="10" fill="%23000" /><circle cx="80" cy="45" r="10" fill="%23000" /><path d="M40,85 Q60,95 80,85" stroke="%23000" stroke-width="3" fill="none" /><path d="M30,30 Q20,10 40,15" stroke="%23000" stroke-width="2" fill="none" /><path d="M90,30 Q100,10 80,15" stroke="%23000" stroke-width="2" fill="none" /></svg>') no-repeat center;
+            background-size: contain;
+            z-index: 10;
+        }
+        
+        .body-shot .soldier::after {
+            content: '';
+            position: absolute;
+            top: 180px;
+            left: 90px;
+            width: 120px;
+            height: 200px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="200" viewBox="0 0 120 200"><path d="M60,0 L100,40 L100,180 L20,180 L20,40 Z" fill="%23ffffff" /><circle cx="40" cy="30" r="5" fill="%23000" /><circle cx="80" cy="30" r="5" fill="%23000" /><circle cx="60" cy="50" r="5" fill="%23000" /><circle cx="40" cy="70" r="5" fill="%23000" /><circle cx="80" cy="70" r="5" fill="%23000" /><circle cx="60" cy="90" r="5" fill="%23000" /><circle cx="40" cy="110" r="5" fill="%23000" /><circle cx="80" cy="110" r="5" fill="%23000" /><circle cx="60" cy="130" r="5" fill="%23000" /><circle cx="40" cy="150" r="5" fill="%23000" /><circle cx="80" cy="150" r="5" fill="%23000" /><circle cx="60" cy="170" r="5" fill="%23000" /></svg>') no-repeat center;
+            background-size: contain;
+            z-index: 5;
+        }
+        
+        .hit-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            font-size: 2.5rem;
+            font-weight: bold;
+            padding: 20px 30px;
+            border-radius: 15px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 20;
+            pointer-events: none;
+            text-align: center;
+            width: 90%;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            letter-spacing: 2px;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }
+        
+        .kena-kepala {
+            color: #ffffff;
+            background: linear-gradient(45deg, #ff3366, #ff0040);
+            border: 3px solid #ff3366;
+            box-shadow: 0 0 25px #ff3366, 0 0 15px #ff3366 inset;
+        }
+        
+        .kena-badan {
+            color: #ffffff;
+            background: linear-gradient(45deg, #33cc33, #00aa00);
+            border: 3px solid #33cc33;
+            box-shadow: 0 0 25px #33cc33, 0 0 15px #33cc33 inset;
+        }
+        
+        .visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+            font-size: 1.5rem;
+        }
+        
+        .score {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .head-score {
+            color: #ff3366;
+        }
+        
+        .body-score {
+            color: #33cc33;
+        }
+        
+        .hit-animation {
+            animation: hit 0.5s ease;
+        }
+        
+        @keyframes hit {
+            0% { transform: translateY(0); }
+            25% { transform: translateY(-10px); }
+            50% { transform: translateY(0); }
+            75% { transform: translateY(-5px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .player-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            min-width: 250px;
+        }
+        
+        .player1-controls {
+            border: 2px solid #ff3366;
+        }
+        
+        .player2-controls {
+            border: 2px solid #33cc33;
+        }
+        
+        .control-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .player1-controls .control-title {
+            color: #ff3366;
+        }
+        
+        .player2-controls .control-title {
+            color: #33cc33;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            background: #ff9900;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #ffaa33;
+            transform: scale(1.05);
+        }
+        
+        .key-instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #ff9900;
+        }
+        
+        .key-instructions h3 {
+            color: #ff9900;
+            margin-bottom: 10px;
+        }
+        
+        .key-instructions p {
+            margin: 5px 0;
+            font-size: 1.1rem;
+        }
+        
+        .key {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #ff9900;
+            color: #000;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 0 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>2 PRAJURIT BERTEMPUR</h1>
+        
+        <div class="players-container">
+            <div class="player player1">
+                <div class="player-title">PRAJURIT 001</div>
+                <div class="soldier-container">
+                    <div class="soldier" id="soldier1"></div>
+                    <div id="kena-kepala-msg1" class="hit-message kena-kepala">KENA KEPALA!</div>
+                    <div id="kena-badan-msg1" class="hit-message kena-badan">KENA BADAN!</div>
+                </div>
+                <div class="score">
+                    Tembakan: <span id="head-count1">0</span> Kepala, <span id="body-count1">0</span> Badan
+                </div>
+            </div>
+            
+            <div class="player player2">
+                <div class="player-title">PRAJURIT 002</div>
+                <div class="soldier-container">
+                    <div class="soldier" id="soldier2"></div>
+                    <div id="kena-kepala-msg2" class="hit-message kena-kepala">KENA KEPALA!</div>
+                    <div id="kena-badan-msg2" class="hit-message kena-badan">KENA BADAN!</div>
+                </div>
+                <div class="score">
+                    Tembakan: <span id="head-count2">0</span> Kepala, <span id="body-count2">0</span> Badan
+                </div>
+            </div>
+        </div>
+               
+        <div class="key-instructions">
+            <h3>Prototipe Sistem Latihan Tempur Lasergun</h3>
+        </div>
+    </div>
+
+    <!-- Audio element for the shooting sound -->
+    <audio id="shooting-sound" src="Shooting.wav" preload="auto"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the shooting sound element
+            const shootingSound = document.getElementById('shooting-sound');
+            
+            // Function to play shooting sound
+            function playShootingSound() {
+                // Reset the audio to start from beginning
+                shootingSound.currentTime = 0;
+                
+                // Play the sound
+                shootingSound.play().catch(error => {
+                    console.log("Audio play failed:", error);
+                    // This catch prevents errors if user hasn't interacted with page
+                });
+            }
+            
+            // Elements for Player 1
+            const kepalaMsgElement1 = document.getElementById('kena-kepala-msg1');
+            const badanMsgElement1 = document.getElementById('kena-badan-msg1');
+            const headCountElement1 = document.getElementById('head-count1');
+            const bodyCountElement1 = document.getElementById('body-count1');
+            const soldierElement1 = document.getElementById('soldier1');
+            const headshotBtn1 = document.getElementById('headshot-btn1');
+            const bodyshotBtn1 = document.getElementById('bodyshot-btn1');
+            
+            // Elements for Player 2
+            const kepalaMsgElement2 = document.getElementById('kena-kepala-msg2');
+            const badanMsgElement2 = document.getElementById('kena-badan-msg2');
+            const headCountElement2 = document.getElementById('head-count2');
+            const bodyCountElement2 = document.getElementById('body-count2');
+            const soldierElement2 = document.getElementById('soldier2');
+            const headshotBtn2 = document.getElementById('headshot-btn2');
+            const bodyshotBtn2 = document.getElementById('bodyshot-btn2');
+            
+            // Scores
+            let headCount1 = 0;
+            let bodyCount1 = 0;
+            let headCount2 = 0;
+            let bodyCount2 = 0;
+            
+            // Function to show message and apply effect
+            function showMessage(messageElement, soldierElement, type, playerNum) {
+                // Play shooting sound
+                playShootingSound();
+                
+                // Apply effect to soldier
+                soldierElement.classList.add(type);
+                soldierElement.classList.add('hit-animation');
+                
+                // Show message
+                messageElement.classList.add('visible');
+                
+                // Update scores
+                if (type === 'head-shot') {
+                    if (playerNum === 1) {
+                        headCount1++;
+                        headCountElement1.textContent = headCount1;
+                    } else {
+                        headCount2++;
+                        headCountElement2.textContent = headCount2;
+                    }
+                } else {
+                    if (playerNum === 1) {
+                        bodyCount1++;
+                        bodyCountElement1.textContent = bodyCount1;
+                    } else {
+                        bodyCount2++;
+                        bodyCountElement2.textContent = bodyCount2;
+                    }
+                }
+                
+                // Remove effects after 1 second
+                setTimeout(() => {
+                    soldierElement.classList.remove(type);
+                    soldierElement.classList.remove('hit-animation');
+                    messageElement.classList.remove('visible');
+                }, 1000);
+            }
+            
+            // Add keyboard event listener
+            document.addEventListener('keydown', function(event) {
+                // Player 1 controls: Z and X
+                if (event.key === 'z' || event.key === 'Z') {
+                    showMessage(kepalaMsgElement1, soldierElement1, 'head-shot', 1);
+                    event.preventDefault();
+                } else if (event.key === 'x' || event.key === 'X') {
+                    showMessage(badanMsgElement1, soldierElement1, 'body-shot', 1);
+                    event.preventDefault();
+                }
+                
+                // Player 2 controls: C and V
+                if (event.key === 'c' || event.key === 'C') {
+                    showMessage(kepalaMsgElement2, soldierElement2, 'head-shot', 2);
+                    event.preventDefault();
+                } else if (event.key === 'v' || event.key === 'V') {
+                    showMessage(badanMsgElement2, soldierElement2, 'body-shot', 2);
+                    event.preventDefault();
+                }
+            });
+            
+            // Add button event listeners for Player 1
+            headshotBtn1.addEventListener('click', function() {
+                showMessage(kepalaMsgElement1, soldierElement1, 'head-shot', 1);
+            });
+            
+            bodyshotBtn1.addEventListener('click', function() {
+                showMessage(badanMsgElement1, soldierElement1, 'body-shot', 1);
+            });
+            
+            // Add button event listeners for Player 2
+            headshotBtn2.addEventListener('click', function() {
+                showMessage(kepalaMsgElement2, soldierElement2, 'head-shot', 2);
+            });
+            
+            bodyshotBtn2.addEventListener('click', function() {
+                showMessage(badanMsgElement2, soldierElement2, 'body-shot', 2);
+            });
+        });
+    </script>
+</body>
+</html>
