@@ -14,12 +14,7 @@ body {
 header {
     padding: 20px;
     text-align: center;
-    background: #020617;
     border-bottom: 1px solid #1e293b;
-}
-h1 {
-    margin: 0;
-    font-size: 26px;
 }
 .container {
     display: grid;
@@ -28,14 +23,12 @@ h1 {
     padding: 20px;
 }
 .panel {
-    background: #020617;
     border: 1px solid #1e293b;
     border-radius: 12px;
     padding: 15px;
 }
 canvas {
     background: #020617;
-    border-radius: 10px;
     display: block;
     margin: 10px auto;
 }
@@ -47,8 +40,6 @@ pre {
     border: 1px solid #1e293b;
     padding: 10px;
     border-radius: 8px;
-    font-size: 14px;
-    overflow-x: auto;
 }
 footer {
     text-align: center;
@@ -56,156 +47,127 @@ footer {
     font-size: 14px;
     opacity: 0.7;
 }
-.label {
-    margin-top: 10px;
-    font-size: 14px;
-}
 </style>
 </head>
 
 <body>
 
 <header>
-    <h1>Fourier, Wavelets & Uncertainty Web Lab</h1>
-    <p>Time–Frequency Duality and the Heisenberg Principle</p>
+<h1>Fourier, Wavelets & Uncertainty Web Lab</h1>
+<p>Time–Frequency Duality and the Heisenberg Principle</p>
 </header>
 
 <div class="container">
 
-<!-- TIME DOMAIN -->
 <div class="panel">
-    <h2>Time Domain Signal</h2>
-    <canvas id="timeCanvas" width="400" height="200"></canvas>
-
-    <div class="label">Gaussian width σ:</div>
-    <input type="range" id="sigmaSlider" min="0.05" max="0.5" step="0.01" value="0.15">
-
-    <pre id="timeInfo"></pre>
+<h2>Time Domain</h2>
+<canvas id="timeCanvas" width="400" height="200"></canvas>
+σ:
+<input type="range" id="sigma" min="0.05" max="0.5" step="0.01" value="0.15">
+<pre id="timeInfo"></pre>
 </div>
 
-<!-- FREQUENCY DOMAIN -->
 <div class="panel">
-    <h2>Fourier Transform</h2>
-    <canvas id="freqCanvas" width="400" height="200"></canvas>
-    <pre id="freqInfo"></pre>
+<h2>Fourier Spectrum</h2>
+<canvas id="freqCanvas" width="400" height="200"></canvas>
+<pre id="freqInfo"></pre>
 </div>
 
-<!-- WINDOWED FOURIER -->
 <div class="panel">
-    <h2>Windowed Fourier (Gabor)</h2>
-    <canvas id="windowCanvas" width="400" height="200"></canvas>
-
-    <div class="label">Window center t₀:</div>
-    <input type="range" id="windowSlider" min="-1" max="1" step="0.01" value="0">
+<h2>Windowed Fourier (Gabor)</h2>
+<canvas id="windowCanvas" width="400" height="200"></canvas>
+t₀:
+<input type="range" id="t0" min="-1" max="1" step="0.01" value="0">
 </div>
 
-<!-- WAVELET -->
 <div class="panel">
-    <h2>Wavelet (Haar)</h2>
-    <canvas id="waveletCanvas" width="400" height="200"></canvas>
-    <pre id="uncertaintyInfo"></pre>
+<h2>Haar Wavelet</h2>
+<canvas id="waveletCanvas" width="400" height="200"></canvas>
+<pre id="uncertaintyInfo"></pre>
 </div>
 
 </div>
 
 <footer>
-    Mathematical Physics · Fourier Analysis · Wavelets · Uncertainty Principle
+Mathematical Physics · Fourier Analysis · Wavelets
 </footer>
 
 <script>
 const N = 256;
 const t = Array.from({length: N}, (_, i) => -1 + 2*i/(N-1));
 
-const timeCanvas = document.getElementById("timeCanvas");
-const freqCanvas = document.getElementById("freqCanvas");
-const windowCanvas = document.getElementById("windowCanvas");
-const waveletCanvas = document.getElementById("waveletCanvas");
-
 const timeCtx = timeCanvas.getContext("2d");
 const freqCtx = freqCanvas.getContext("2d");
 const windowCtx = windowCanvas.getContext("2d");
 const waveletCtx = waveletCanvas.getContext("2d");
 
-const sigmaSlider = document.getElementById("sigmaSlider");
-const windowSlider = document.getElementById("windowSlider");
-
-const timeInfo = document.getElementById("timeInfo");
-const freqInfo = document.getElementById("freqInfo");
-const uncertaintyInfo = document.getElementById("uncertaintyInfo");
-
-function gaussian(t, sigma) {
-    return Math.exp(-t*t/(2*sigma*sigma));
+function gaussian(x, s) {
+    return Math.exp(-x*x/(2*s*s));
 }
 
 function dft(signal) {
-    const re = [], im = [];
+    const mag = [];
     for (let k = 0; k < N; k++) {
-        let sumRe = 0, sumIm = 0;
+        let re = 0, im = 0;
         for (let n = 0; n < N; n++) {
-            const angle = 2*Math.PI*k*n/N;
-            sumRe += signal[n]*Math.cos(angle);
-            sumIm -= signal[n]*Math.sin(angle);
+            const a = 2*Math.PI*k*n/N;
+            re += signal[n]*Math.cos(a);
+            im -= signal[n]*Math.sin(a);
         }
-        re.push(sumRe);
-        im.push(sumIm);
+        mag.push(Math.sqrt(re*re + im*im));
     }
-    return re.map((r, i) => Math.sqrt(r*r + im[i]*im[i]));
+    return mag;
 }
 
-function drawSignal(ctx, signal, color="#38bdf8") {
-    ctx.clearRect(0, 0, 400, 200);
+function normalize(arr) {
+    const m = Math.max(...arr.map(v => Math.abs(v))) || 1;
+    return arr.map(v => v/m);
+}
+
+function draw(ctx, signal, color) {
+    ctx.clearRect(0,0,400,200);
     ctx.strokeStyle = color;
     ctx.beginPath();
-    signal.forEach((y, i) => {
-        const x = i * 400 / N;
+    signal.forEach((y,i)=>{
+        const x = i*400/N;
         const py = 100 - 80*y;
-        if (i === 0) ctx.moveTo(x, py);
-        else ctx.lineTo(x, py);
+        i===0 ? ctx.moveTo(x,py) : ctx.lineTo(x,py);
     });
     ctx.stroke();
 }
 
-function draw() {
-    const sigma = parseFloat(sigmaSlider.value);
-    const t0 = parseFloat(windowSlider.value);
+function update() {
+    const σ = +sigma.value;
+    const t0 = +t0Slider.value;
 
-    const signal = t.map(x => gaussian(x, sigma));
-    drawSignal(timeCtx, signal);
+    const ψ = t.map(x => gaussian(x,σ));
+    draw(timeCtx, normalize(ψ), "#38bdf8");
 
-    const spectrum = dft(signal);
-    drawSignal(freqCtx, spectrum.map(x => x / Math.max(...spectrum)), "#f87171");
+    const Ψ = normalize(dft(ψ));
+    draw(freqCtx, Ψ, "#f87171");
 
-    const windowed = t.map((x, i) =>
-        signal[i] * Math.exp(-(x - t0)**2 / (2 * 0.1 * 0.1))
-    );
-    drawSignal(windowCtx, windowed, "#4ade80");
+    const windowed = t.map((x,i)=>ψ[i]*Math.exp(-(x-t0)**2/0.02));
+    draw(windowCtx, normalize(windowed), "#4ade80");
 
-    const haar = t.map(x =>
-        Math.abs(x) < sigma ? 1 : -1
-    );
-    drawSignal(waveletCtx, haar, "#a78bfa");
+    const haar = t.map(x => x<0 ? 1 : -1);
+    draw(waveletCtx, haar, "#a78bfa");
 
-    const deltaT = sigma;
-    const deltaF = 1 / (2 * Math.PI * sigma);
+    const Δt = σ;
+    const Δω = 1/(2*Math.PI*σ);
 
-    timeInfo.textContent =
-`ψ(t) = exp(-t² / 2σ²)
-Δt ≈ σ = ${deltaT.toFixed(3)}`;
-
-    freqInfo.textContent =
-`|ψ̃(ω)|
-Δω ≈ 1 / (2πσ) = ${deltaF.toFixed(3)}`;
-
+    timeInfo.textContent = `Δt ≈ ${Δt.toFixed(3)}`;
+    freqInfo.textContent = `Δω ≈ ${Δω.toFixed(3)}`;
     uncertaintyInfo.textContent =
-`Heisenberg Uncertainty:
-Δt · Δω ≈ ${(deltaT*deltaF).toFixed(3)}
-
-Minimum uncertainty for Gaussian states`;
+`Δt·Δω ≈ ${(Δt*Δω).toFixed(3)}
+Gaussian saturates uncertainty bound`;
 }
 
-sigmaSlider.addEventListener("input", draw);
-windowSlider.addEventListener("input", draw);
-draw();
+const sigma = document.getElementById("sigma");
+const t0Slider = document.getElementById("t0");
+
+sigma.addEventListener("input", update);
+t0Slider.addEventListener("input", update);
+update();
 </script>
 
 </body>
