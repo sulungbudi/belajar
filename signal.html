@@ -146,7 +146,9 @@ function update() {
     const Ψ = normalize(dft(ψ));
     draw(freqCtx, Ψ, "#f87171");
 
-    const windowed = t.map((x,i)=>ψ[i]*Math.exp(-(x-t0)**2/0.02));
+    const windowed = t.map((x,i)=>
+        ψ[i] * Math.exp(-((x - t0) ** 2) / 0.02)
+    );
     draw(windowCtx, normalize(windowed), "#4ade80");
 
     const haar = t.map(x => x<0 ? 1 : -1);
