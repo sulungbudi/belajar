@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Symmetry & Group Theory Explorer</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #0f172a;
+        color: #e5e7eb;
+    }
+    header {
+        padding: 20px;
+        text-align: center;
+        background: #020617;
+    }
+    h1 {
+        margin: 0;
+        font-size: 26px;
+    }
+    .container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 20px;
+    }
+    .panel {
+        background: #020617;
+        padding: 15px;
+        border-radius: 10px;
+    }
+    canvas {
+        background: #020617;
+        border-radius: 10px;
+        display: block;
+        margin: auto;
+    }
+    input[type=range] {
+        width: 100%;
+    }
+    pre {
+        background: #020617;
+        padding: 10px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 14px;
+    }
+    footer {
+        text-align: center;
+        padding: 10px;
+        font-size: 14px;
+        opacity: 0.7;
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Symmetry & Group Theory Explorer</h1>
+    <p>SO(2) rotations and SU(2) spin-½ representations</p>
+</header>
+
+<div class="container">
+
+<!-- SO(2) PANEL -->
+<div class="panel">
+    <h2>SO(2): Planar Rotation</h2>
+    <canvas id="so2Canvas" width="300" height="300"></canvas>
+    <p>Rotation angle θ (radians):</p>
+    <input type="range" min="0" max="6.283" step="0.01" id="thetaSlider">
+    <pre id="so2Matrix"></pre>
+</div>
+
+<!-- SU(2) PANEL -->
+<div class="panel">
+    <h2>SU(2): Spin-½ Rotation</h2>
+    <canvas id="su2Canvas" width="300" height="300"></canvas>
+    <p>Rotation angle θ about z-axis:</p>
+    <input type="range" min="0" max="6.283" step="0.01" id="phiSlider">
+    <pre id="su2Matrix"></pre>
+</div>
+
+</div>
+
+<footer>
+    Theoretical Physics · Group Representations · Interactive Visualization
+</footer>
+
+<script>
+/* ================================
+   SO(2) ROTATION
+================================ */
+const so2Canvas = document.getElementById("so2Canvas");
+const so2Ctx = so2Canvas.getContext("2d");
+const thetaSlider = document.getElementById("thetaSlider");
+const so2MatrixBox = document.getElementById("so2Matrix");
+
+function drawSO2(theta) {
+    so2Ctx.clearRect(0, 0, 300, 300);
+    so2Ctx.translate(150, 150);
+
+    // axes
+    so2Ctx.strokeStyle = "#334155";
+    so2Ctx.beginPath();
+    so2Ctx.moveTo(-140, 0);
+    so2Ctx.lineTo(140, 0);
+    so2Ctx.moveTo(0, -140);
+    so2Ctx.lineTo(0, 140);
+    so2Ctx.stroke();
+
+    // original vector
+    so2Ctx.strokeStyle = "#38bdf8";
+    so2Ctx.beginPath();
+    so2Ctx.moveTo(0, 0);
+    so2Ctx.lineTo(100, 0);
+    so2Ctx.stroke();
+
+    // rotated vector
+    const x = 100 * Math.cos(theta);
+    const y = 100 * Math.sin(theta);
+    so2Ctx.strokeStyle = "#f87171";
+    so2Ctx.beginPath();
+    so2Ctx.moveTo(0, 0);
+    so2Ctx.lineTo(x, y);
+    so2Ctx.stroke();
+
+    so2Ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // matrix display
+    const c = Math.cos(theta).toFixed(3);
+    const s = Math.sin(theta).toFixed(3);
+    so2MatrixBox.textContent =
+`R(θ) =
+[ ${c}  -${s} ]
+[ ${s}   ${c} ]`;
+}
+
+thetaSlider.addEventListener("input", e => drawSO2(parseFloat(e.target.value)));
+drawSO2(0);
+
+
+/* ================================
+   SU(2) SPIN-½
+================================ */
+const su2Canvas = document.getElementById("su2Canvas");
+const su2Ctx = su2Canvas.getContext("2d");
+const phiSlider = document.getElementById("phiSlider");
+const su2MatrixBox = document.getElementById("su2Matrix");
+
+function drawSU2(phi) {
+    su2Ctx.clearRect(0, 0, 300, 300);
+    su2Ctx.translate(150, 150);
+
+    // Bloch sphere projection
+    su2Ctx.strokeStyle = "#64748b";
+    su2Ctx.beginPath();
+    su2Ctx.arc(0, 0, 100, 0, 2 * Math.PI);
+    su2Ctx.stroke();
+
+    // spin vector
+    const x = 100 * Math.cos(phi);
+    const y = 100 * Math.sin(phi);
+    su2Ctx.strokeStyle = "#4ade80";
+    su2Ctx.beginPath();
+    su2Ctx.moveTo(0, 0);
+    su2Ctx.lineTo(x, y);
+    su2Ctx.stroke();
+
+    su2Ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    const a = Math.cos(phi / 2).toFixed(3);
+    const b = Math.sin(phi / 2).toFixed(3);
+
+    su2MatrixBox.textContent =
+`U = exp(-i σz θ / 2)
+
+[ e^{-iθ/2}    0 ]
+[    0     e^{iθ/2} ]
+
+Spinor:
+ψ = ( ${a} , ${b} )`;
+}
+
+phiSlider.addEventListener("input", e => drawSU2(parseFloat(e.target.value)));
+drawSU2(0);
+</script>
+
+</body>
+</html>
